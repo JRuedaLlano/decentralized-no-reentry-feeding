@@ -26,29 +26,57 @@ The code is split into **runner scripts** and **postprocessing scripts**.
 ├── postprocess_simulation_I.py
 ├── run_simulation_II_policy_comparison.py
 └── postprocess_simulation_II.py
+```
+
+---
+
+## Requirements
+
+Install dependencies with:
+
+```bash
+pip install -r requirements.txt
+```
+
+The `requirements.txt` file contains:
+
+```text
+numpy
+matplotlib
+scipy
+```
+
+---
 
 ## Reproducibility workflow
 
 The repository has two separate pipelines.
 
-1. Simulation I: convergence dynamics
+### 1. Simulation I: convergence dynamics
 
 Run the simulation:
 
+```bash
 python run_simulation_I_convergence.py
+```
 
 This creates the raw Simulation I outputs locally in:
 
+```text
 simulation_outputs_convergence/
 ├── convergence_cell_summaries.csv
 └── convergence_raw_times.csv
+```
 
 Then run the postprocessing:
 
+```bash
 python postprocess_simulation_I.py
+```
 
 This creates the processed Simulation I outputs locally in:
 
+```text
 simulation_outputs_convergence_postprocessed/
 ├── convergence_processed_summary.csv
 ├── convergence_fit_summary.csv
@@ -63,26 +91,34 @@ simulation_outputs_convergence_postprocessed/
     ├── scope_comparison_gamma_0.75.png
     ├── parameter_and_ratio_combined.pdf
     └── parameter_and_ratio_combined.png
+```
 
-2. Simulation II: policy comparison
+### 2. Simulation II: policy comparison
 
 Run the simulation:
 
+```bash
 python run_simulation_II_policy_comparison.py
+```
 
 This creates the raw Simulation II outputs locally in:
 
+```text
 simulation_outputs_policy_comparison/
 ├── policy_comparison_global_indices.csv
 ├── policy_comparison_rank_profiles.csv
 └── policy_comparison_rank_groups.csv
+```
 
 Then run the postprocessing:
 
+```bash
 python postprocess_simulation_II.py
+```
 
 This creates the processed Simulation II outputs locally in:
 
+```text
 simulation_outputs_policy_comparison_postprocessed/
 ├── policy_global_compact.csv
 ├── tables/
@@ -103,83 +139,105 @@ simulation_outputs_policy_comparison_postprocessed/
     ├── policy_rank_queue_hard.png
     ├── policy_rank_queue_favorable.pdf
     └── policy_rank_queue_favorable.png
+```
+
+---
 
 ## Relation to the paper
 
-Simulation I
+### Simulation I
 
-This pipeline reproduces the results on convergence to the favorable absorbing configuration under Policy A.
+This pipeline reproduces the results on convergence to the favorable absorbing configuration under **Policy A**.
 
 It corresponds to the manuscript section on:
 
-convergence dynamics,
-empirical q
-0.95
-	​
+- convergence dynamics,
+- empirical q95 summaries,
+- descriptive finite-range growth comparisons,
+- scope and parameter effects.
 
- summaries,
-descriptive finite-range growth comparisons,
-scope and parameter effects.
-Simulation II
+### Simulation II
 
 This pipeline reproduces the policy comparison between:
 
-Policy A: no re-entry within session,
-Free access: re-entry allowed within session.
+- **Policy A**: no re-entry within session,
+- **Free access**: re-entry allowed within session.
 
 It corresponds to the manuscript section on:
 
-feeder utilization,
-ration shortfall,
-queue burden,
-rank-level coverage profiles,
-rank-level queue profiles,
-grouped top/middle/bottom rank summaries.
+- feeder utilization,
+- ration shortfall,
+- queue burden,
+- rank-level coverage profiles,
+- rank-level queue profiles,
+- grouped top/middle/bottom rank summaries.
+
+---
 
 ## Output conventions
 
-Scope labels
-local_s1 = Local scope with radius s=1
-global = Global scope
-Policy labels
-A = Policy A
-free = Free access
+### Scope labels
+
+- `local_s1` = Local scope with radius `s = 1`
+- `global` = Global scope
+
+### Policy labels
+
+- `A` = Policy A
+- `free` = Free access
+
+---
 
 ## Notes on computation
 
-Simulation I
+### Simulation I
 
 Simulation I uses adaptive replication by design cell. The script stops each cell when the target precision rule is met or when the maximum replication cap is reached.
 
 As a result:
 
-the number of replications may vary by cell,
-the final cell-summary file records the realized replication count for each design cell.
-Simulation II
+- the number of replications may vary by cell,
+- the final cell-summary file records the realized replication count for each design cell.
+
+### Simulation II
 
 Simulation II uses a fixed number of replications per cell and a fixed time horizon.
+
+---
 
 ## Data and outputs
 
 The repository contains only the code required to generate the simulation outputs. No external input data are required. All CSV files, figures, and LaTeX tables are created locally when the scripts are executed.
 
+---
+
 ## Suggested execution order
 
 For full reproduction:
 
+```bash
 python run_simulation_I_convergence.py
 python postprocess_simulation_I.py
 python run_simulation_II_policy_comparison.py
 python postprocess_simulation_II.py
+```
+
+---
 
 ## Citation
 
 If you use this code, please cite the associated paper.
 
+---
+
 ## License
+
+Add your preferred license here.
+
+---
 
 ## Contact
 
-José Rueda-Llano
-Friedrich Schiller University Jena
+**José Rueda-Llano**  
+Friedrich Schiller University Jena  
 Email: jose.rueda.llano@uni-jena.de
