@@ -125,7 +125,8 @@ simulation_outputs_policy_comparison_postprocessed/
 │   ├── table_policy_global_outcomes_hard.tex
 │   ├── table_policy_global_outcomes_favorable.tex
 │   ├── table_policy_rank_groups_hard.tex
-│   └── table_policy_rank_groups_favorable.tex
+│   ├── table_policy_rank_groups_favorable.tex
+│   └── table_policy_global_ci_j150.tex
 └── figures/
     ├── policy_global_indices_hard.pdf
     ├── policy_global_indices_hard.png
@@ -152,7 +153,7 @@ This pipeline reproduces the results on convergence to the favorable absorbing c
 It corresponds to the manuscript section on:
 
 - convergence dynamics,
-- empirical q95 summaries,
+- empirical \(q_{0.95}\) summaries,
 - descriptive finite-range growth comparisons,
 - scope and parameter effects.
 
@@ -170,7 +171,8 @@ It corresponds to the manuscript section on:
 - queue burden,
 - rank-level coverage profiles,
 - rank-level queue profiles,
-- grouped top/middle/bottom rank summaries.
+- grouped top/middle/bottom rank summaries,
+- bootstrap confidence-interval summaries for the main outcomes at \(J=150\).
 
 ---
 
@@ -178,8 +180,8 @@ It corresponds to the manuscript section on:
 
 ### Scope labels
 
-- `local_s1` = Local scope with radius `s = 1`
-- `global` = Global scope
+- `local_s1` = local scope with radius `s = 1`
+- `global` = global scope
 
 ### Policy labels
 
@@ -201,13 +203,35 @@ As a result:
 
 ### Simulation II
 
-Simulation II uses a fixed number of replications per cell and a fixed time horizon.
+Simulation II uses a fixed simulation design:
+
+- `J ∈ {10, 50, 100, 150}`
+- parameter regimes `(\gamma_min, p_min) ∈ {(0.25, 0.55), (0.75, 0.85)}`
+- local scope (`s = 1`) and global scope
+- policies `A` and `free`
+- `100` independent replications per design cell
+- `400` simulated days per replication
+- `K = 6` sessions per day
+- `100` burn-in days
+- long-run averages computed over the remaining `300` days
+
+For each reported mean outcome, uncertainty is summarized using a two-sided **95% percentile bootstrap confidence interval** across replications. The bootstrap uses:
+
+- the replication-level sample mean as the bootstrap statistic,
+- `2000` bootstrap resamples,
+- the empirical `2.5%` and `97.5%` quantiles as interval endpoints.
 
 ---
 
 ## Data and outputs
 
 The repository contains only the code required to generate the simulation outputs. No external input data are required. All CSV files, figures, and LaTeX tables are created locally when the scripts are executed.
+
+In particular, the manuscript-level Simulation II uncertainty summary at \(J=150\) is generated automatically by the postprocessing pipeline as:
+
+```text
+tables/table_policy_global_ci_j150.tex
+```
 
 ---
 
@@ -237,6 +261,8 @@ Add your preferred license here.
 ---
 
 ## Contact
+
+For questions about the code or manuscript, please contact:
 
 **José Rueda-Llano**  
 Friedrich Schiller University Jena  
