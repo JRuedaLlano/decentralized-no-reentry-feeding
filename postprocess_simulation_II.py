@@ -403,7 +403,7 @@ def export_latex_global_ci_table_j150(
     policy_order = ["A", "free"]
 
     def fmt_ci(mean: float, low: float, high: float) -> str:
-        return f"{mean:.3f} ({low:.3f}, {high:.3f})"
+        return f"{mean:.4f} ({low:.4f}, {high:.4f})"
 
     def scope_label(scope: str) -> str:
         return "Local scope" if scope == "local_s1" else "Global scope"
