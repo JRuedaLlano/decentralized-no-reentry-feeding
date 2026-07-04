@@ -234,6 +234,31 @@ def subset_global(
     return subset
 
 
+def select_global_row(
+    rows: Sequence[GlobalIndexRow],
+    scope: str,
+    gamma_min: float,
+    p_min: float,
+    policy: str,
+    J: int,
+) -> GlobalIndexRow:
+    matches = [
+        r for r in rows
+        if r.scope == scope
+        and abs(r.gamma_min - gamma_min) < 1e-12
+        and abs(r.p_min - p_min) < 1e-12
+        and r.policy == policy
+        and r.J == J
+    ]
+    if len(matches) != 1:
+        raise ValueError(
+            f"Expected exactly one row for "
+            f"(scope={scope}, gamma_min={gamma_min}, p_min={p_min}, policy={policy}, J={J}), "
+            f"found {len(matches)}."
+        )
+    return matches[0]
+
+
 def subset_rank_profiles(
     rows: Sequence[RankProfileRow],
     scope: str,
@@ -523,6 +548,89 @@ def plot_global_indices(
         plt.close(fig)
 
 
+def plot_policy_effects_j150(
+    rows: Sequence[GlobalIndexRow],
+    outdir: str | Path,
+) -> None:
+    """
+    Plot the point-estimate policy advantage of Policy A over Free access
+    at J = 150 for the four benchmark regime/scope cells.
+
+    Note:
+    This figure uses the summarized global rows currently available in the
+    postprocessing pipeline. It therefore plots effect estimates only, not
+    bootstrap confidence intervals for the policy differences themselves.
+    """
+    outdir = ensure_dir(outdir)
+
+    cells = [
+        (0.25, 0.55, "local_s1", "Harder, local"),
+        (0.25, 0.55, "global",   "Harder, global"),
+        (0.75, 0.85, "local_s1", "Favorable, local"),
+        (0.75, 0.85, "global",   "Favorable, global"),
+    ]
+
+    # Positive values always mean "better under Policy A"
+    metric_specs = [
+        (
+            "U_feed_mean",
+            lambda a, f: a - f,
+            r"$\Delta U_{\mathrm{feed}}$",
+            "Feeder utilization gain",
+        ),
+        (
+            "V_P1_mean",
+            lambda a, f: f - a,
+            r"$\Delta V_{P1}$",
+            "Ration shortfall reduction",
+        ),
+        (
+            "V_P5_mean",
+            lambda a, f: f - a,
+            r"$\Delta V_{P5}$",
+            "Queue burden reduction",
+        ),
+    ]
+
+    labels = [label for _, _, _, label in cells]
+    y = np.arange(len(cells))
+
+    fig, axes = plt.subplots(1, 3, figsize=(11.0, 4.8), sharey=True)
+    fig.subplots_adjust(left=0.28, right=0.98, bottom=0.16, top=0.90, wspace=0.20)
+
+    for ax, (field, effect_fn, short_label, title) in zip(axes, metric_specs):
+        effects = []
+
+        for gamma_min, p_min, scope, _label in cells:
+            row_A = select_global_row(rows, scope, gamma_min, p_min, "A", 150)
+            row_F = select_global_row(rows, scope, gamma_min, p_min, "free", 150)
+
+            a_val = float(getattr(row_A, field))
+            f_val = float(getattr(row_F, field))
+            effects.append(effect_fn(a_val, f_val))
+
+        effects = np.array(effects, dtype=float)
+
+        ax.axvline(0.0, linewidth=1.0)
+        ax.hlines(y, 0.0, effects, linewidth=1.4, alpha=0.7)
+        ax.plot(effects, y, marker="o", linewidth=0.0, markersize=6.0)
+
+        ax.set_title(title, fontsize=12, pad=8)
+        ax.set_xlabel(short_label, fontsize=11)
+        ax.grid(True, axis="x", alpha=0.3)
+        ax.tick_params(axis="both", labelsize=10)
+
+    axes[0].set_yticks(y)
+    axes[0].set_yticklabels(labels, fontsize=10)
+    axes[0].invert_yaxis()
+
+    for ax in axes[1:]:
+        ax.tick_params(axis="y", labelleft=False)
+
+    fig.savefig(outdir / "policy_effects_j150.pdf", bbox_inches="tight", pad_inches=0.02)
+    fig.savefig(outdir / "policy_effects_j150.png", dpi=300, bbox_inches="tight", pad_inches=0.02)
+    plt.close(fig)
+
 def plot_rank_profiles(
     rows: Sequence[RankProfileRow],
     outdir: str | Path,
@@ -647,6 +755,7 @@ def export_all_policy_postprocessed_outputs(
 
     fig_dir = ensure_dir(outdir / "figures")
     plot_global_indices(global_rows, fig_dir)
+    plot_policy_effects_j150(global_rows, fig_dir)
     plot_rank_profiles(
         rank_profile_rows,
         fig_dir,
